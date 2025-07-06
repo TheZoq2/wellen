@@ -654,19 +654,19 @@ impl Hierarchy {
         self.scopes.first()
     }
 
+    pub fn iter_unique_signal_vars(&self) -> impl Iterator<Item = Option<Var>> + use <'_>{
+        self.signal_idx_to_var.iter().map(|maybe_var_id| {
+            if let Some(var_id) = maybe_var_id {
+                Some((self[*var_id]).clone())
+            } else {
+                None
+            }
+        })
+    }
+
     /// Returns one variable per unique signal in the order of signal handles.
     /// The value will be None if there is no var pointing to the given handle.
-    pub fn get_unique_signals_vars(&self) -> Vec<Option<Var>> {
-        let mut out = Vec::with_capacity(self.signal_idx_to_var.len());
-        for maybe_var_id in self.signal_idx_to_var.iter() {
-            if let Some(var_id) = maybe_var_id {
-                out.push(Some((self[*var_id]).clone()));
-            } else {
-                out.push(None)
-            }
-        }
-        out
-    }
+    // pub fn get_unique_signals_vars(&self) -> Vec<Option<Var>> {}
 
     /// Size of the Hierarchy in bytes.
     pub fn size_in_memory(&self) -> usize {
@@ -1011,8 +1011,7 @@ impl HierarchyBuilder {
                 flattened: false,
             });
 
-            self.scope_names
-                .insert(node_id, FxHashMap::default());
+            self.scope_names.insert(node_id, FxHashMap::default());
             let name_str = self.get_str(name).to_string();
             self.scope_names
                 .entry(parent.map(|parent| parent.index()).unwrap_or(usize::MAX))
